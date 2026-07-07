@@ -31,9 +31,11 @@
 > I notice watchlists default to `public=True`. We don't have a documented decision on default visibility for user lists. Before I can approve this, I need you to add a note to your PR description explaining your reasoning. I want to make sure we're being intentional here, not just inheriting a default.
 > — @dev-lead, general PR comment
 
-**My position:**
-**Reasoning:**
-**Tradeoff acknowledged:**
+**My position:** I changed the default from `public=True` to `public=False`. Watchlist entries should be private unless a user explicitly chooses to share them.
+
+**Reasoning:** Right now there is no way for a user to set `public` themselves — `POST /watchlist/<user_id>/add` only accepts `film_id`. That means the current `True` default isn't really a "default" in the normal sense of "the value most users would pick if asked" — it's the *only* outcome, applied to every entry, for every user, with no exceptions and no input from anyone. If we're going to force one outcome on all users until a visibility toggle exists, it should be the outcome that doesn't expose anything they didn't choose to expose. A watchlist can reveal more than someone intends to share — what they're planning to watch, when, and why — and none of that should become visible without some action on their part.
+
+**Tradeoff acknowledged:** CineLog is a *community* film tracking app, and a private-by-default watchlist means the social/discovery value of watchlists (friends seeing what you want to watch) starts at zero engagement until users manually opt in — most users never change a default, so this could make any future "browse watchlists" feature launch quieter than it would with `public=True`. I'm accepting that tradeoff because the failure modes aren't symmetric: an overly private default just means slower adoption of a social feature, which is fully recoverable later with an onboarding prompt or UI nudge. An overly public default means real exposure — someone's data being visible before they ever decided that was okay — and that can't be undone once it's happened. I'd rather under-share by default and let users opt in than expose everyone by default and hope no one minds.
 
 ## Comment 5 — Sort order
 > I'd prefer watchlists to default to "date added" order rather than alphabetical. Most users want to see what they added recently. I'm open to discussion if you see it differently — but let's make a decision and document it.
