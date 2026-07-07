@@ -41,9 +41,11 @@
 > I'd prefer watchlists to default to "date added" order rather than alphabetical. Most users want to see what they added recently. I'm open to discussion if you see it differently — but let's make a decision and document it.
 > — @dev-lead, `services/watchlist_service.py:50`
 
-**My position:**
-**Reasoning:**
-**Engagement with reviewer's point:**
+**My position:** I agree with the reviewer. Changed `get_watchlist()` in `services/watchlist_service.py` to sort by `WatchlistEntry.date_added.desc()` (newest first), replacing the previous `Film.title.asc()` (alphabetical).
+
+**Reasoning:** `get_collection()` in `collection_service.py` already sorts the analogous "already watched" list by `date_added.desc()`. Watchlist and collection are the two most similar list views in the app, and having one sort by recency while the other sorts alphabetically was an inconsistency with no clear justification — a user familiar with how their collection displays would reasonably expect their watchlist to behave the same way.
+
+**Engagement with reviewer's point:** The reviewer's argument was that most users want to see what they added recently, and I don't have a reason to disagree — if anything, the existing `get_collection()` precedent suggests the product already made this same UX bet once and it's worked. The main case for alphabetical (finding a specific title, or checking whether you already added something) is largely handled elsewhere now: Comment 2's deduplication logic already prevents duplicate entries at the service layer, so alphabetical order isn't doing much load-bearing work for that use case anymore. A future "let the caller choose sort order via a query param" option could still be worth exploring later (similar to how `routes/films.py` supports `?genre=` and `?year=` filters), but that's a bigger, separate feature than what this comment is asking for — a decision on the default.
 
 ## Comment 6 — Rebase
 > A refactor merged to `main` that changed film IDs from integers to UUIDs. Your watchlist code still references integer IDs. Please rebase on `main` and update accordingly.
