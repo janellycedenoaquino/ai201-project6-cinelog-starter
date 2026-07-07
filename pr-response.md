@@ -51,9 +51,11 @@
 > A refactor merged to `main` that changed film IDs from integers to UUIDs. Your watchlist code still references integer IDs. Please rebase on `main` and update accordingly.
 > — @dev-lead, general PR comment
 
-**What conflicted:**
-**How I resolved it:**
-**How I verified no conflict remains:**
+**What conflicted:** Ran `git fetch origin` then `git rebase origin/main`. `main` had merged a refactor (`refactor: migrate film IDs from integer to UUID`) that changed `Film.id` and `CollectionEntry.film_id` from `db.Integer` to `db.String(36)` in `models.py`, while my branch's commits also touched `models.py` to add the `WatchlistEntry` model with an integer `film_id`. Git flagged `models.py` as conflicting since both sides modified overlapping parts of the file.
+
+**How I resolved it:** Resolved the conflict in favor of `main`'s UUID-based `Film`/`CollectionEntry` definitions while keeping my `WatchlistEntry` model. After the rebase completed, I found `WatchlistEntry.film_id` was still declared as `db.Integer` — the conflict resolution hadn't carried the UUID migration over to the new model, since `WatchlistEntry` didn't exist yet when the refactor was originally written. Updated it to `db.String(36)` to match `Film.id`, and updated two stale docstrings (in `add_to_watchlist()` and the `add_film` route) that still described `film_id` as an integer.
+
+**How I verified no conflict remains:** Confirmed no leftover conflict markers with `grep -rn "<<<<<<<\|=======\|>>>>>>>" --include="*.py" .` (no matches) and no `.orig` files. Confirmed the branch history is linear with `git log --oneline --graph origin/main..HEAD` — no merge commits. Ran `pytest tests/ -v` — all 5 tests pass.
 
 ## PR Description
 <!-- Written at the end — feature overview, design decisions, manual testing steps -->
