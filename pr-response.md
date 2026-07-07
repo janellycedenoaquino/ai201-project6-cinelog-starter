@@ -15,8 +15,9 @@
 > What happens if a user calls this with a film that's already on their watchlist? The current implementation would add a duplicate entry. Please handle this case.
 > — @dev-lead, `services/watchlist_service.py:30`
 
-**What I did:**
-**How I verified:**
+**What I did:** Added deduplication logic to `add_to_watchlist()` in `services/watchlist_service.py`, mirroring the pattern in `add_to_collection()`: after confirming the film exists, query for an existing `WatchlistEntry` matching `user_id` + `film_id` via `.filter_by(...).first()`, and raise before inserting if one is found. Defined a new `AlreadyInWatchlistError` exception in `watchlist_service.py` rather than reusing `collection_service.py`'s `AlreadyInCollectionError`, since the two errors represent different domains (collection vs. watchlist) and a caller should be able to distinguish them.
+
+**How I verified:** Initially reused `AlreadyInCollectionError` imported from `collection_service.py` to raise on a watchlist duplicate — on review, caught that this conflated two domains under one exception class and would prevent callers from telling a collection duplicate apart from a watchlist duplicate. Replaced it with a locally-defined `AlreadyInWatchlistError`, matching the naming convention of `collection_service.py`'s own exception classes. Ran `pytest tests/ -v` after the change to confirm the existing 4 tests still pass (no `test_watchlist.py` yet — that's Comment 3).
 
 ## Comment 3 — Missing test
 > Please add a test for the case where `film_id` doesn't exist in the database. Look at the existing tests in `test_collection.py` — the pattern is there.
