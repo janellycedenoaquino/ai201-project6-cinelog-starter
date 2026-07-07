@@ -23,8 +23,9 @@
 > Please add a test for the case where `film_id` doesn't exist in the database. Look at the existing tests in `test_collection.py` — the pattern is there.
 > — @dev-lead, general PR comment
 
-**What I did:**
-**How I verified:**
+**What I did:** Created `tests/test_watchlist.py` with `test_add_to_watchlist_nonexistent_film_raises`, modeled directly on `test_add_to_collection_nonexistent_film_raises` in `test_collection.py`. Reused the same `app` and `sample_user` fixture structure (in-memory SQLite, created/torn down per test) and the same fake-UUID approach (`"00000000-0000-0000-0000-000000000000"`) to assert `add_to_watchlist()` raises `FilmNotFoundError` for a film that doesn't exist. No `sample_film` fixture needed, since the collection test it's modeled on doesn't use one either — the point of the test is the nonexistent case.
+
+**How I verified:** Ran `pytest tests/test_watchlist.py -v` to confirm the new test passes on its own, then `pytest tests/ -v` to confirm all 5 tests across both files pass together with no regressions.
 
 ## Comment 4 — Default visibility
 > I notice watchlists default to `public=True`. We don't have a documented decision on default visibility for user lists. Before I can approve this, I need you to add a note to your PR description explaining your reasoning. I want to make sure we're being intentional here, not just inheriting a default.
